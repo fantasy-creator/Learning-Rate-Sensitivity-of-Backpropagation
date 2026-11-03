@@ -1,0 +1,10 @@
+# Only the code release is tracked; everything else in the project folder stays local.
+/*
+!/.gitignore
+!/.gitattributes
+!/README.md
+!/requirements.txt
+!/run.sh
+!/src/
+__pycache__/
+*.pyc

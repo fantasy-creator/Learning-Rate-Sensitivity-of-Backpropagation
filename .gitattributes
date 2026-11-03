@@ -1,0 +1,2 @@
+# Keep LF on every platform: the SHA-1 of src/core.py is stored in each result as code_version.
+* text=auto eol=lf
