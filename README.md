@@ -2,8 +2,6 @@
 
 # Learning-Rate Sensitivity of Backpropagation
 
-### A One-Step Bound and an Empirical Study of Proximal Updates
-
 [**Zekai Yu**](https://github.com/fantasy-creator)<sup>\*</sup> &nbsp;·&nbsp;
 [**Tingshuo Fan**](https://github.com/Survivor613)<sup>\*</sup> &nbsp;·&nbsp;
 [**Jiacheng Chen**](https://github.com/eliiiii05)<sup>\*</sup>
@@ -17,11 +15,11 @@ University of California, Davis &nbsp;·&nbsp; ECS 171 Machine Learning, final p
 ![PyTorch 2.3](https://img.shields.io/badge/PyTorch-2.3-EE4C2C?logo=pytorch&logoColor=white)
 ![Training runs](https://img.shields.io/badge/training%20runs-4%2C950-555555)
 
-<img src="assets/lr_windows.png" width="100%" alt="Usable learning rates of BP+SGD, ProxProp and ProxProp-all on three datasets and three network depths">
+<img src="assets/overview.png" width="100%" alt="Study overview: the question, the controls that separate step length from direction, and the experiments">
 
-<p><em>Each bar joins the learning rates at which a method trains well: final validation accuracy within 2 points of the
-best SGD-family run of that setting. ProxProp moves the bar to larger learning rates. ProxProp-all, which also applies
-the proximal update to the output layer, widens it and never fails numerically.</em></p>
+<p><em>Study overview. We distinguish a shift in the usable learning-rate range from an increase in its width, and use
+norm-matched SGD controls to isolate the effect of the proximal update direction. We sweep learning rates on three
+datasets at depths of one to three hidden layers and test proximal damping of the output layer with ProxProp-all.</em></p>
 
 </div>
 
@@ -76,6 +74,14 @@ preconditioned direction.
 | BP+Adam | Adam | Adam | reference |
 
 ## Results
+
+### Usable learning rates
+
+<p align="center"><img src="assets/lr_windows.png" width="100%" alt="Usable learning rates of BP+SGD, ProxProp and ProxProp-all on three datasets and three network depths"></p>
+
+Each bar joins the learning rates at which a method trains well: final validation accuracy within 2 points of the best
+SGD-family run of that setting. ProxProp moves the bar to larger learning rates. ProxProp-all, which also applies the
+proximal update to the output layer, widens it and never fails numerically.
 
 ### Learning-rate sweeps
 
@@ -181,7 +187,7 @@ the 3,510-run main sweep took about 24 minutes.
 | Logistic-regression baseline, per-step cost | | `results/logreg.json`, `results/bench_step.json` |
 
 `src/postprocess.sh` writes tables to `paper/tables/` and figures to `paper/figures/`. `src/fig_readme.py` draws the
-figure at the top of this page.
+usable-learning-rate figure under Results.
 
 ## Repository structure
 
@@ -216,18 +222,6 @@ the initialization and the mini-batch order, which all methods share. Every resu
 editing `src/core.py` invalidates earlier results. The reported results have `code_version` `5d565f754e9a` and used
 Python 3.10, PyTorch 2.3.0 and NumPy 1.24.4; other versions may give slightly different numbers. All 270 test-stage
 re-runs reproduced their sweep's validation accuracy exactly.
-
-## Citation
-
-```bibtex
-@misc{yu2026lrsensitivity,
-  title        = {Learning-Rate Sensitivity of Backpropagation: A One-Step Bound and an Empirical Study of Proximal Updates},
-  author       = {Yu, Zekai and Fan, Tingshuo and Chen, Jiacheng},
-  year         = {2026},
-  note         = {ECS 171 final project, University of California, Davis},
-  howpublished = {\url{https://github.com/fantasy-creator/Learning-Rate-Sensitivity-of-Backpropagation}}
-}
-```
 
 ## Acknowledgments
 
