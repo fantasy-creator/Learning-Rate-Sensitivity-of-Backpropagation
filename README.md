@@ -211,6 +211,7 @@ usable-learning-rate figure under Results.
     ├── make_tables.py          LaTeX tables: datasets and update rules
     ├── make_results_tables.py  LaTeX tables: results
     ├── fig_*.py                figures of the report
+    ├── plot_style.py           shared figure style: fonts, colors, axes
     └── postprocess.sh          analysis, tables and figures in one go
 ```
 
