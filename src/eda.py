@@ -14,13 +14,10 @@ does not look at data that later selects or scores a model.
 import json
 import os
 
-import matplotlib
+import numpy as np
 
-matplotlib.use("Agg")
-matplotlib.rcParams["pdf.fonttype"] = 42  # embed TrueType, not Type 3
-matplotlib.rcParams["ps.fonttype"] = 42
-import matplotlib.pyplot as plt  # noqa: E402
-import numpy as np  # noqa: E402
+import plot_style as ps
+import matplotlib.pyplot as plt  # noqa: E402  (plot_style selects the backend)
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(ROOT, "data", "processed")
@@ -30,16 +27,14 @@ DS = ["drybean", "optdigits", "har"]
 DSN = {"drybean": "Dry Bean", "optdigits": "Optdigits", "har": "HAR"}
 BATCH, N_BATCHES, SEED = 128, 10, 0
 
-INK, INK2, GRID = "#0b0b0b", "#52514e", "#d9d8d4"
-# fixed categorical order (the validated palette of src/fig_sweep.py), used here for class identity
+INK, INK2, GRID = ps.INK, ps.INK2, ps.GRID
+# categorical class colors of the supporting plots (up to 10 classes)
 CAT = ["#2a78d6", "#eb6834", "#1baf7a", "#eda100", "#e87ba4", "#008300", "#7b5bd6", "#8c6d4f", "#5a9bb0", "#b04a5a"]
-LINESTYLE = {"drybean": "-", "optdigits": "--", "har": ":"}
-# same style as src/fig_*.py, so the EDA figure matches the other figures of the report
-plt.rcParams.update({"font.family": "serif", "font.serif": ["Times New Roman", "DejaVu Serif"],
-                     "font.size": 7, "axes.labelsize": 7, "legend.fontsize": 6.5,
-                     "xtick.labelsize": 6, "ytick.labelsize": 6, "axes.edgecolor": INK2,
-                     "axes.linewidth": 0.6, "xtick.color": INK2, "ytick.color": INK2,
-                     "axes.labelcolor": INK, "mathtext.fontset": "stix"})
+# HAR activities in the report figure: the three walking activities in blues, the static postures in oranges
+ACTIVITY = ["#08519c", "#3a87c8", "#8fc0e3", "#8c2d04", "#e6550d", "#fdae6b"]
+# datasets in order of input dimension (16, 64, 561) on the blue ramp of the other figures
+LINE = {"drybean": (ps.RAMP3[0], "-"), "optdigits": (ps.RAMP3[1], "--"), "har": (ps.RAMP3[2], ":")}
+ps.apply(7.0)  # same style as src/fig_*.py, so the EDA figure matches the other figures of the report
 
 
 def load(name):
@@ -154,21 +149,23 @@ def panel_spectrum(ax, S, info, show_lmax=False):
     for n in DS:
         lam = S[n]["lam"][:S[n]["rank"]]
         extra = f", $\\lambda_{{max}}$ {S[n]['lam_max']:.2g}" if show_lmax else ""
-        ax.plot(np.arange(1, len(lam) + 1), lam, LINESTYLE[n], color=INK, lw=1.0,
+        color, ls = LINE[n]
+        ax.plot(np.arange(1, len(lam) + 1), lam, ls=ls, color=color, lw=1.4,
                 label=f"{DSN[n]} (rank {S[n]['rank']}/{info[n]['d'] + 1}{extra})")
     ax.set_xscale("log")
     ax.set_yscale("log")
-    ax.set_xlabel("eigenvalue index $i$")
-    ax.set_ylabel("eigenvalue $\\lambda_i$")
+    ax.set_xlabel("Eigenvalue index $i$")
+    ax.set_ylabel("Eigenvalue $\\lambda_i$")
     top = max(S[n]["lam"][0] for n in DS)
     ax.set_ylim(top=top * 3e3)  # headroom so the legend sits above the curves
-    ax.legend(loc="upper right", frameon=True, framealpha=0.95, edgecolor=GRID, handlelength=2.4, borderaxespad=0.3)
-    ax.grid(True, which="major", color=GRID, lw=0.35)
-    ax.set_axisbelow(True)
+    ax.legend(loc="upper right", handlelength=2.4, borderaxespad=0.4)
+    ax.grid(True, which="major")
+    ax.grid(False, which="minor")
 
 
 def panel_corr(ax, corr, labels, fig, cbar=True):
     im = ax.imshow(corr, cmap="RdBu_r", vmin=-1, vmax=1, interpolation="nearest")
+    ax.grid(False)
     ax.set_xticks(range(len(labels)))
     ax.set_yticks(range(len(labels)))
     ax.set_xticklabels(labels, rotation=90, fontsize=5)
@@ -184,18 +181,15 @@ def panel_corr(ax, corr, labels, fig, cbar=True):
     return im
 
 
-def panel_pca(ax, Z, ev, y, classes, rng, n_max=2000, legend=True):
+def panel_pca(ax, Z, ev, y, classes, rng, n_max=2000, legend=True, colors=CAT):
     idx = rng.permutation(len(y))[:n_max]
     for c in range(len(classes)):
         m = idx[y[idx] == c]
-        ax.scatter(Z[m, 0], Z[m, 1], s=2.2, color=CAT[c], alpha=0.55, lw=0, label=classes[c], rasterized=True)
+        ax.scatter(Z[m, 0], Z[m, 1], s=2.4, color=colors[c], alpha=0.6, lw=0, label=classes[c], rasterized=True)
     ax.set_xlabel(f"PC1 ({100 * ev[0]:.0f}% of variance)")
     ax.set_ylabel(f"PC2 ({100 * ev[1]:.0f}%)")
-    ax.grid(True, color=GRID, lw=0.35)
-    ax.set_axisbelow(True)
     if legend:
-        ax.legend(markerscale=3, frameon=True, framealpha=0.95, edgecolor=GRID, handletextpad=0.2,
-                  borderaxespad=0.3, labelspacing=0.25, loc="best", fontsize=5.5)
+        ax.legend(markerscale=3, handletextpad=0.2, borderaxespad=0.4, labelspacing=0.25, loc="best", fontsize=5.8)
 
 
 def short_activity(name):
@@ -205,21 +199,18 @@ def short_activity(name):
 
 
 def make_paper_figure(D, S, C, P, info):
-    fig = plt.figure(figsize=(7.16, 2.3))
-    gs = fig.add_gridspec(1, 3, width_ratios=[1, 1.05, 1], wspace=0.45, left=0.075, right=0.99, bottom=0.25, top=0.9)
-    ax = fig.add_subplot(gs[0])
-    panel_spectrum(ax, S, info)
-    ax.set_title("(a) First-layer input spectrum", fontsize=7.5, color=INK)
-    ax = fig.add_subplot(gs[1])
+    fig = plt.figure(figsize=(7.16, 2.25))
+    gs = fig.add_gridspec(1, 3, width_ratios=[1, 1.05, 1], wspace=0.45, left=0.075, right=0.99, bottom=0.3, top=0.97)
+    axes = [fig.add_subplot(gs[k]) for k in range(3)]
+    panel_spectrum(axes[0], S, info)
     corr, keep = C["drybean"]
     names = [info["drybean"]["features"][i] for i in np.flatnonzero(keep)]
-    panel_corr(ax, corr, [abbrev(s) for s in names], fig)
-    ax.set_title("(b) Dry Bean feature correlation", fontsize=7.5, color=INK)
-    ax = fig.add_subplot(gs[2])
+    panel_corr(axes[1], corr, [abbrev(s) for s in names], fig)
     Z, ev = P["har"]
     classes = [short_activity(c) for c in info["har"]["classes"]]
-    panel_pca(ax, Z, ev, D["har"]["y"], classes, np.random.default_rng(SEED))
-    ax.set_title("(c) HAR inputs, PCA", fontsize=7.5, color=INK)
+    panel_pca(axes[2], Z, ev, D["har"]["y"], classes, np.random.default_rng(SEED), colors=ACTIVITY)
+    ps.subcaptions(fig, axes, ["(a) First-layer input spectrum", "(b) Dry Bean feature correlation",
+                               "(c) HAR inputs, PCA"])
     fig.savefig(os.path.join(FIG, "eda.pdf"), bbox_inches="tight")
     fig.savefig(os.path.join(OUT, "eda_paper_preview.png"), dpi=200, bbox_inches="tight")
     plt.close(fig)
@@ -259,7 +250,8 @@ def make_supporting_figures(D, S, C, P, info):
     for n in DS:
         sd = np.sort(D[n]["raw"].std(0))[::-1]
         sd = sd[sd > 1e-8]
-        ax.plot(np.linspace(0, 1, len(sd)), sd, LINESTYLE[n], color=INK, lw=1.0, label=DSN[n])
+        color, ls = LINE[n]
+        ax.plot(np.linspace(0, 1, len(sd)), sd, ls=ls, color=color, lw=1.2, label=DSN[n])
     ax.set_yscale("log")
     ax.set_xlabel("features, sorted by standard deviation (fraction of d)")
     ax.set_ylabel("raw standard deviation")
@@ -286,6 +278,7 @@ def make_supporting_figures(D, S, C, P, info):
             panel_corr(ax, corr, [abbrev(s) for s in names], fig)
         else:
             im = ax.imshow(corr, cmap="RdBu_r", vmin=-1, vmax=1, interpolation="nearest")
+            ax.grid(False)
             fig.colorbar(im, ax=ax, fraction=0.046, pad=0.03, ticks=[-1, 0, 1]).set_label("Pearson $r$")
             ax.set_xlabel("feature")
             ax.set_ylabel("feature")

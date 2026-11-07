@@ -9,11 +9,11 @@ Output: assets/lr_windows.png
 import json
 import os
 
-import matplotlib
-matplotlib.use("Agg")
-import matplotlib.pyplot as plt  # noqa: E402
-from matplotlib.lines import Line2D  # noqa: E402
-from matplotlib.ticker import NullFormatter  # noqa: E402
+from matplotlib.lines import Line2D
+from matplotlib.ticker import NullFormatter
+
+import plot_style as ps
+import matplotlib.pyplot as plt  # noqa: E402  (plot_style selects the backend)
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = os.path.join(ROOT, "assets")
@@ -22,15 +22,9 @@ LRS = [1e-4, 3e-4, 1e-3, 3e-3, 1e-2, 3e-2, 1e-1, 3e-1, 1.0, 3.0, 10.0, 30.0, 100
 DELTA = 2.0  # pp
 DSN = {"drybean": "Dry Bean", "optdigits": "Optdigits", "har": "HAR"}
 ARCHN = {"shallow": "1 hidden\nlayer", "medium": "2 hidden\nlayers", "deep": "3 hidden\nlayers"}
-# fixed order of the paper figures; ProxProp-all is a darker step of their pink, so that it stays
-# distinguishable from ProxProp's orange in adjacent lanes (validated palette)
-METHODS = [("bp_sgd", "BP+SGD", "#2a78d6", "o"), ("prox_sgd", "ProxProp", "#eb6834", "s"),
-           ("prox_all", "ProxProp-all", "#c2408c", "D")]
-INK, INK2, MUTED, GRID = "#0b0b0b", "#52514e", "#8a8984", "#e4e3df"
-plt.rcParams.update({"font.family": "sans-serif", "font.sans-serif": ["Arial", "DejaVu Sans"],
-                     "font.size": 10, "axes.edgecolor": INK2, "axes.linewidth": 0.7,
-                     "xtick.color": INK2, "ytick.color": INK2, "xtick.labelsize": 9.5,
-                     "ytick.labelsize": 9.5, "mathtext.fontset": "dejavusans"})
+# colors, markers and fonts of the report figures (src/plot_style.py)
+METHODS = [(m, ps.METHOD[m][0], ps.METHOD[m][1], ps.METHOD[m][2]) for m in ("bp_sgd", "prox_sgd", "prox_all")]
+INK, INK2, MUTED, GRID = ps.INK, ps.INK2, ps.MUTED, ps.GRID
 
 
 def runs_of(flags):
@@ -61,6 +55,7 @@ def lane(ax, y, rec, color, marker):
 
 
 def main():
+    ps.apply(10.5)
     S = json.load(open(os.path.join(ROOT, "results", "summary_main.json")))
     by = {(r["dataset"], r["arch"], r["method"]): r for r in S if r.get("scale", 1.0) == 1.0}
     fig, axes = plt.subplots(1, 3, figsize=(9.6, 4.5), sharey=True)
@@ -79,12 +74,11 @@ def main():
         ax.xaxis.set_minor_formatter(NullFormatter())
         ax.tick_params(axis="x", which="minor", length=0)
         ax.tick_params(axis="y", length=0)
-        ax.grid(True, axis="x", which="minor", color=GRID, lw=0.8)
-        ax.set_axisbelow(True)
-        ax.set_title(DSN[ds], fontsize=11.5, color=INK, pad=6)
-        ax.set_xlabel(r"learning rate $\eta$", color=INK)
-        for s in ("top", "right"):
-            ax.spines[s].set_visible(False)
+        ax.grid(False, axis="y")
+        ax.grid(False, axis="x", which="major")
+        ax.grid(True, axis="x", which="minor")
+        ax.set_title(DSN[ds], fontsize=12, pad=6)
+        ax.set_xlabel(r"Learning rate $\eta$")
     axes[0].set_yticks(centers[:3])
     axes[0].set_yticklabels(list(ARCHN.values()), color=INK)
     axes[0].set_ylim(10.8, -0.8)
