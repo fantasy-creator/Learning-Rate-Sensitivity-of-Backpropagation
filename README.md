@@ -37,8 +37,8 @@ settings and raises test accuracy on HAR by 1.1 to 1.9 points.
 ## Highlights
 
 - **A one-step bound.** From a fixed state, changing the learning rate from $\eta$ to $\eta+\delta$ moves BP's update
-  by exactly $|\delta|\,\Vert g\Vert_F$ and ProxProp's by at most $|\delta|\,\Vert g\Vert_F/(1+\mu)$, where $\mu$ is
-  the smallest eigenvalue of the layer's input second-moment matrix. A mode-wise bound, $|\delta|\,\Vert G\Vert_F/2$,
+  by exactly $\lvert\delta\rvert \Vert g\Vert_F$ and ProxProp's by at most $\lvert\delta\rvert \Vert g\Vert_F/(1+\mu)$, where $\mu$ is
+  the smallest eigenvalue of the layer's input second-moment matrix. A mode-wise bound, $\lvert\delta\rvert \Vert G\Vert_F/2$,
   does not depend on the input scale.
 - **The bounds hold.** None is violated in 1,260 layer-level checks, and the scale-free bound is the tightest in every
   check, a median factor of 2.5 above the measured response.
@@ -56,9 +56,9 @@ All update rules share BP's forward and backward pass and differ only in how the
 step. For a layer with input batch $\hat A$ (one column per sample, plus a row of ones for the bias):
 
 $$
-\text{BP+SGD:}\quad W \leftarrow W - \eta\, g
+\text{BP+SGD:}\quad W \leftarrow W - \eta g
 \qquad\qquad
-\text{ProxProp:}\quad W \leftarrow W - \eta\, g\, M^{-1},\qquad M = \hat A \hat A^{\top} + \tau_\theta^{-1} I
+\text{ProxProp:}\quad W \leftarrow W - \eta g M^{-1},\qquad M = \hat A \hat A^{\top} + \tau_\theta^{-1} I
 $$
 
 We use $\tau_\theta = 1$. The proximal step solves this small linear system per layer, exactly, by a Cholesky
@@ -68,11 +68,11 @@ preconditioned direction.
 
 | Method | Hidden layers | Output layer | Role |
 | --- | --- | --- | --- |
-| BP+SGD | $-\eta\, g$ | $-\eta\, g$ | baseline, Eq. 8 of Rumelhart et al. (1986) |
-| ProxProp | $-\eta\, g M^{-1}$ | $-\eta\, g$ | Frerix et al. (2018) |
-| ProxProp-all | $-\eta\, g M^{-1}$ | $-\eta\, g M^{-1}$ | proximal update on every layer |
-| NM-static | $-\eta\, c_l\, g$ | $-\eta\, g$ | ProxProp's step length, measured at initialization |
-| NM-dynamic | $-\eta\, s_l(t)\, g$ | $-\eta\, g$ | ProxProp's step length, recomputed every step |
+| BP+SGD | $-\eta g$ | $-\eta g$ | baseline, Eq. 8 of Rumelhart et al. (1986) |
+| ProxProp | $-\eta g M^{-1}$ | $-\eta g$ | Frerix et al. (2018) |
+| ProxProp-all | $-\eta g M^{-1}$ | $-\eta g M^{-1}$ | proximal update on every layer |
+| NM-static | $-\eta c_l g$ | $-\eta g$ | ProxProp's step length, measured at initialization |
+| NM-dynamic | $-\eta s_l(t) g$ | $-\eta g$ | ProxProp's step length, recomputed every step |
 | BP+Adam | Adam | Adam | reference |
 
 ## Results
@@ -121,7 +121,7 @@ BP's in every hidden layer, against the median of each bound. No check violates 
 <p align="center"><img src="assets/scale.png" width="100%" alt="Usable learning rates when the inputs are scaled"></p>
 
 Usable learning rates (bars) and the best learning rate (markers) when every input is multiplied by
-$s \in \{0.1, 1, 10\}$, for networks with 2 hidden layers. Triangles mark windows that reach the top of the grid.
+$s \in \lbrace 0.1, 1, 10 \rbrace$, for networks with 2 hidden layers. Triangles mark windows that reach the top of the grid.
 $s = 1$ is the main sweep (5 seeds), the other scales use 3 seeds.
 
 <p align="center"><img src="assets/eda.png" width="100%" alt="Exploratory data analysis of the three datasets"></p>
