@@ -7,6 +7,7 @@ for exp in main scale momentum tau; do
     python src/analyze.py --exp "$exp" > "results/analysis_$exp.txt" 2>&1
   fi
 done
+python src/eda.py > /dev/null
 python src/universal_lr.py > results/analysis_universal_lr.txt
 python src/make_tables.py
 python src/make_results_tables.py
