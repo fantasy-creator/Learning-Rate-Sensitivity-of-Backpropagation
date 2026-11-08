@@ -139,10 +139,10 @@ batches). (b) Feature correlation in Dry Bean. (c) First two principal component
 
 </details>
 
-## Live demo
+## Live demo and video
 
 The [project page](https://fantasy-creator.github.io/Learning-Rate-Sensitivity-of-Backpropagation/) has two
-interactive panels. Everything runs in the browser, so the page also works offline from `docs/index.html`.
+interactive panels. The networks run in the browser; the page loads its styles and fonts from public CDNs.
 
 - **Learning-rate explorer.** Pick a dataset and a depth and move the learning rate. The page shows the final validation
   accuracy against the learning rate and the training curves of BP+SGD, ProxProp and ProxProp-all, from the per-epoch
@@ -150,20 +150,23 @@ interactive panels. Everything runs in the browser, so the page also works offli
 - **Input → model → output.** Draw a digit or pick one from the Optdigits test split. Three networks with two hidden
   layers, trained by the three update rules at the chosen learning rate, classify it in the browser. A network that
   broke down at a large learning rate gives the same answer for every input.
-- **Guided tour.** A one-minute narrated walk through both panels for presentations, also recorded as a
-  [1080p video](docs/assets/tour.mp4).
+- **Guided tour.** A one-minute narrated walk through both panels for presentations.
 
-To rebuild the demo data and video:
+The [experiment video](docs/assets/experiments.mp4) (65 s, 1080p) trains the three update rules side by side on
+Optdigits at learning rates 0.01, 10 and 100, with their training logs and their predictions on 60 validation digits
+after every epoch, and then shows the usable learning rates of all nine settings.
+
+To rebuild the demo data and the video:
 
 ```bash
-python src/demo_data.py                  # explorer data from results/, written to docs/data/sweep.js
-python src/export_demo.py                # trains the 39 demo networks (CPU, about 20 s with 13 workers)
-python -m http.server 8765 --directory docs
-node src/record_tour.mjs --url "http://127.0.0.1:8765/#record" --out tour.mp4   # needs Chrome and ffmpeg
+python src/demo_data.py      # explorer data from results/, written to docs/data/sweep.js
+python src/export_demo.py    # trains the 39 demo networks (CPU, about 20 s with 13 workers)
+python src/trace_demo.py     # per-epoch traces of 12 runs for the video (CPU, a few seconds)
+python src/make_video.py     # renders docs/assets/experiments.mp4 (needs ffmpeg)
 ```
 
-`src/export_demo.py` retrains the seed-0 runs of the main sweep and checks that every network reproduces its sweep
-result exactly.
+`src/export_demo.py` and `src/trace_demo.py` retrain seed-0 runs of the main sweep and check that every network
+reproduces its sweep result exactly.
 
 ## Getting started
 
@@ -245,7 +248,8 @@ usable-learning-rate figure under Results.
     ├── plot_style.py           shared figure style: fonts, colors, axes
     ├── demo_data.py            data of the demo's learning-rate explorer
     ├── export_demo.py          trains and exports the demo networks
-    ├── record_tour.mjs         records the demo's guided tour as a video
+    ├── trace_demo.py           per-epoch traces of a few runs for the video
+    ├── make_video.py           renders the experiment video
     └── postprocess.sh          analysis, tables and figures in one go
 ```
 
