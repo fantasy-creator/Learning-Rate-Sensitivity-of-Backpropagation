@@ -7,5 +7,6 @@
 !/run.sh
 !/src/
 !/assets/
+!/docs/
 __pycache__/
 *.pyc
