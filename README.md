@@ -15,6 +15,8 @@ University of California, Davis &nbsp;·&nbsp; ECS 171 Machine Learning, final p
 ![PyTorch 2.3](https://img.shields.io/badge/PyTorch-2.3-EE4C2C?logo=pytorch&logoColor=white)
 ![Training runs](https://img.shields.io/badge/training%20runs-4%2C950-555555)
 
+**[Project page and live demo](https://fantasy-creator.github.io/Learning-Rate-Sensitivity-of-Backpropagation/)**
+
 <img src="assets/overview.png" width="100%" alt="Study overview: the question, the controls that separate step length from direction, and the experiments">
 
 <p><em>Study overview. We distinguish a shift in the usable learning-rate range from an increase in its width, and use
@@ -137,6 +139,31 @@ batches). (b) Feature correlation in Dry Bean. (c) First two principal component
 
 </details>
 
+## Live demo
+
+The [project page](https://fantasy-creator.github.io/Learning-Rate-Sensitivity-of-Backpropagation/) has two
+interactive panels. Everything runs in the browser, so the page also works offline from `docs/index.html`.
+
+- **Learning-rate explorer.** Pick a dataset and a depth and move the learning rate. The page shows the final validation
+  accuracy against the learning rate and the training curves of BP+SGD, ProxProp and ProxProp-all, from the per-epoch
+  results of the main sweep.
+- **Input → model → output.** Draw a digit or pick one from the Optdigits test split. Three networks with two hidden
+  layers, trained by the three update rules at the chosen learning rate, classify it in the browser. A network that
+  broke down at a large learning rate gives the same answer for every input.
+- **Guided tour.** A one-minute narrated walk through both panels for presentations.
+
+To rebuild the demo data and video:
+
+```bash
+python src/demo_data.py                  # explorer data from results/, written to docs/data/sweep.js
+python src/export_demo.py                # trains the 39 demo networks (CPU, about 20 s with 13 workers)
+python -m http.server 8765 --directory docs
+node src/record_tour.mjs --url "http://127.0.0.1:8765/#record" --out tour.mp4   # needs Chrome and ffmpeg
+```
+
+`src/export_demo.py` retrains the seed-0 runs of the main sweep and checks that every network reproduces its sweep
+result exactly.
+
 ## Getting started
 
 ### Installation
@@ -195,6 +222,9 @@ usable-learning-rate figure under Results.
 ├── run.sh                      experiment pipeline
 ├── requirements.txt
 ├── assets/                     figures of this README
+├── docs/                       project page and live demo (GitHub Pages)
+│   ├── index.html, style.css, app.js
+│   └── data/                   explorer data and demo networks
 └── src/
     ├── core.py                 data loading, MLPs, update rules, training loop
     ├── data_prep.py            fixed train/validation/test splits
@@ -212,6 +242,9 @@ usable-learning-rate figure under Results.
     ├── make_results_tables.py  LaTeX tables: results
     ├── fig_*.py                figures of the report
     ├── plot_style.py           shared figure style: fonts, colors, axes
+    ├── demo_data.py            data of the demo's learning-rate explorer
+    ├── export_demo.py          trains and exports the demo networks
+    ├── record_tour.mjs         records the demo's guided tour as a video
     └── postprocess.sh          analysis, tables and figures in one go
 ```
 
