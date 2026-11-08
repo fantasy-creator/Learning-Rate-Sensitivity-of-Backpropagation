@@ -93,7 +93,8 @@ await closeChrome();
 
 await new Promise((res, rej) => {
   const p = spawn(FFMPEG, ["-y", "-loglevel", "error", "-framerate", String(FPS), "-i", path.join(dir, "f%05d.png"),
-    "-c:v", "libx264", "-preset", "slow", "-crf", "18", "-pix_fmt", "yuv420p", "-movflags", "+faststart", OUT],
+    "-c:v", "libx264", "-preset", "slow", "-crf", "18", "-pix_fmt", "yuv420p", "-movflags", "+faststart",
+    "-threads", process.env.FFMPEG_THREADS || "0", OUT], // FFMPEG_THREADS limits the encoder's CPU use
   { stdio: "inherit" });
   p.on("exit", (code) => (code === 0 ? res() : rej(new Error("ffmpeg exited with " + code))));
 });
