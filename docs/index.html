@@ -1,220 +1,334 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Learning-Rate Sensitivity of Backpropagation</title>
-<meta name="description" content="Does Proximal Backpropagation widen the range of learning rates that train well, or only move it? Project page and interactive demo of an ECS 171 final project at UC Davis.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&display=swap">
-<link rel="stylesheet" href="style.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Learning-Rate Sensitivity of Backpropagation: does Proximal Backpropagation widen the range of learning rates that train well, or only move it? ECS 171 final project, UC Davis.">
+  <title>Learning-Rate Sensitivity of Backpropagation</title>
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+          onload="renderMathInElement(document.body, {delimiters: [{left: '\\(', right: '\\)', display: false}]})"></script>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <div id="page">
 
-<header class="hero">
-  <div class="wrap">
-    <p class="venue">ECS 171 Machine Learning &middot; Final Project</p>
-    <h1>Learning-Rate Sensitivity of Backpropagation</h1>
-    <p class="subtitle">Proximal Backpropagation has been reported to tolerate much larger learning rates than plain
-      backpropagation. Does it widen the range of learning rates that train well, or only move it?</p>
-    <p class="authors">
-      <a href="https://github.com/fantasy-creator">Zekai Yu</a><sup>*</sup> &nbsp;&middot;&nbsp;
-      <a href="https://github.com/Survivor613">Tingshuo Fan</a><sup>*</sup> &nbsp;&middot;&nbsp;
-      <a href="https://github.com/eliiiii05">Jiacheng Chen</a><sup>*</sup>
-    </p>
-    <p class="affil">University of California, Davis &nbsp;&nbsp;<span class="muted"><sup>*</sup>Equal contribution</span></p>
-    <div class="buttons">
-      <a class="btn" href="https://github.com/fantasy-creator/Learning-Rate-Sensitivity-of-Backpropagation">
-        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
-        Code
-      </a>
-      <a class="btn" href="#demo">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H4zM2 18h20v2H2z" opacity=".95"/></svg>
-        Live demo
-      </a>
-      <a class="btn" href="#results">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10h4v10zm6 0V4h4v16zm6 0v-7h4v7z"/></svg>
-        Results
-      </a>
-      <button class="btn btn-accent" id="tour-btn" type="button">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l13-7.5z"/></svg>
-        Guided tour
-      </button>
+<section class="hero is-small">
+  <div class="hero-body">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column has-text-centered">
+          <br>
+          <h1 class="title is-2 publication-title">Learning-Rate Sensitivity of Backpropagation</h1>
+          <p class="subtitle is-5 publication-venue">ECS 171 Machine Learning, Final Project</p>
+          <div class="is-size-4 publication-authors">
+            <span class="author-block"><a href="https://github.com/fantasy-creator" target="_blank">Zekai Yu</a><sup>*</sup>,&nbsp;</span>
+            <span class="author-block"><a href="https://github.com/Survivor613" target="_blank">Tingshuo Fan</a><sup>*</sup>,&nbsp;</span>
+            <span class="author-block"><a href="https://github.com/eliiiii05" target="_blank">Jiacheng Chen</a><sup>*</sup></span>
+          </div>
+          <div class="is-size-5 publication-authors">
+            <span class="author-block">University of California, Davis</span>
+          </div>
+          <div class="is-size-5 publication-authors">
+            <span class="author-block">(* Equal contribution.)</span>
+          </div>
+          <div class="column has-text-centered">
+            <div class="publication-links">
+              <span class="link-block">
+                <a href="https://github.com/fantasy-creator/Learning-Rate-Sensitivity-of-Backpropagation" target="_blank"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon"><i class="fab fa-github"></i></span>
+                  <span>Code</span>
+                </a>
+              </span>
+              <span class="link-block">
+                <a href="#demo" class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon"><i class="fas fa-sliders"></i></span>
+                  <span>Demo</span>
+                </a>
+              </span>
+              <span class="link-block">
+                <a href="assets/tour.mp4" target="_blank" class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon"><i class="fas fa-video"></i></span>
+                  <span>Video</span>
+                </a>
+              </span>
+              <span class="link-block">
+                <button type="button" id="tour-btn" class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon"><i class="fas fa-play"></i></span>
+                  <span>Guided Tour</span>
+                </button>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
-</header>
+</section>
 
-<main>
-  <section class="wrap">
-    <div class="figure"><img src="assets/overview.png" alt="Study overview: the question, the controls that separate step length from direction, and the experiments"></div>
-    <p class="caption"><b>Study overview.</b> We distinguish a shift in the usable learning-rate range from an increase in
-      its width, and use norm-matched SGD controls to isolate the effect of the proximal update direction. We sweep learning
-      rates on three datasets at depths of one to three hidden layers and test proximal damping of the output layer with
-      ProxProp-all.</p>
-  </section>
+<div class="teaser has-text-centered">
+  <video id="teaser-video" src="assets/tour.mp4" poster="assets/overview.png" controls muted autoplay loop playsinline></video>
+</div>
 
-  <section class="wrap tldr">
-    <h2>TL;DR</h2>
-    <p>Mostly it moves it. The proximal step is provably smaller than backpropagation's gradient step, so the learning rates
-      that train well shift up by half a decade to two decades, but the range gets wider in only 3 of 9 settings. Applying
-      the proximal update to the output layer as well, the one layer our bound shows is left undamped, removes every
-      numerical failure and widens the range in 8 of 9 settings.</p>
-    <div class="stats">
-      <div class="stat"><div class="num prox">0.5&ndash;2 decades</div><p>how far ProxProp moves the usable learning-rate range up</p></div>
-      <div class="stat"><div class="num prox">3 of 9</div><p>settings in which ProxProp's range is wider than BP's</p></div>
-      <div class="stat"><div class="num">8 of 9 &middot; 0 failures</div><p>ProxProp-all: wider than BP, and no numerical failure in 585 runs</p></div>
-      <div class="stat"><div class="num">+1.1 to +1.9 pp</div><p>ProxProp-all's test-accuracy gain over BP+SGD on HAR (Holm-adjusted p &lt; 0.05)</p></div>
+<section class="section hero is-light">
+  <div class="hero-body">
+    <div class="container is-max-desktop is-centered has-text-centered">
+      <h2 class="title is-3">Abstract</h2>
+      <div class="content has-text-justified">
+        <p>
+          Backpropagation (BP) with stochastic gradient descent uses a single learning rate, and the range of rates that train
+          well varies with the data and the network. One alternative is Proximal Backpropagation (ProxProp), which keeps the
+          backward pass but replaces each hidden layer's gradient step with a proximal step and has been reported to tolerate
+          much larger learning rates. At the same learning rate, however, a proximal step is smaller than a gradient step.
+          Smaller steps by themselves shift the usable range toward larger rates but need not widen it. We therefore measure
+          the shift and the widening separately. We prove that, for one step from a fixed state, the proximal step's response
+          to a learning-rate change is at most a data-dependent fraction of the gradient step's, and we add a bound on this
+          response that does not depend on the input scale. On 1,260 layer-level checks, this scale-free bound is the tightest
+          in every case and exceeds the measured response by a median factor of 2.5. We then train small fully connected
+          networks with one to three hidden layers on three UCI datasets, using 13 learning rates, five paired seeds and six
+          update rules (3,510 runs). Two of the rules are SGD controls that take BP's direction with ProxProp's per-layer step
+          length, matched at initialization or at every step. ProxProp moves the usable range up by half a decade to two
+          decades in all nine dataset&ndash;depth settings, but it widens the range in only three; overall, it cuts numerical
+          failures from 101 to 62. In peak validation accuracy, the control matched at every step comes within 0.06 points of
+          ProxProp on one dataset, exceeds it on another and trails it on the third, so whether the proximal direction helps
+          depends on the dataset. Extending the update to the output layer, the only layer our whole-network bound leaves
+          undamped, removes all numerical failures, widens the range in eight of nine settings and raises test accuracy on the
+          activity-recognition dataset by 1.1 to 1.9 points (Holm-adjusted <i>p</i> &lt; 0.05).
+        </p>
+      </div>
     </div>
-  </section>
+  </div>
+</section>
 
-  <section class="wrap" id="demo">
-    <h2>Interactive demo</h2>
-    <p class="lead">Both panels use the runs and networks of the report. Nothing is sent to a server: the networks run in
-      your browser.</p>
+<section class="section">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered">
+      <div class="column is-full-width">
+        <h2 class="title is-3">Shift or Widening?</h2>
 
-    <div class="panel" id="explorer">
-      <div class="panel-head">
-        <span class="step">1</span>
-        <div>
-          <h3>Learning-rate explorer</h3>
-          <p>Each point is the final validation accuracy of a 100-epoch run, averaged over 5 seeds (3,510 runs in total).
-            Pick a dataset and a depth, then move the learning rate.</p>
+        <h2 class="title is-4">Motivation</h2>
+        <div class="content has-text-justified">
+          <p>
+            Rumelhart, Hinton and Williams train layered networks with one global step size, and the range of step sizes that
+            train well moves with the data, the architecture and the preprocessing. ProxProp keeps backpropagation's backward
+            pass but turns the gradient of each hidden layer into a proximal step, which multiplies the gradient by
+            \((I + AA^\top)^{-1}\). At equal \(\eta\) this step is smaller, so a
+            larger learning rate is needed for the same progress. The question is whether the range of good learning rates
+            only moves, or also becomes wider.
+          </p>
+          <img class="figure" src="assets/overview.png" alt="Study overview">
+          <div class="notification is-light">
+            <p><strong>Figure 1: Study overview.</strong> We distinguish a shift in the usable learning-rate range from an
+              increase in its width, and use norm-matched SGD controls to isolate the effect of the proximal update direction.
+              We sweep learning rates on three datasets at depths of one to three hidden layers and test proximal damping of the
+              output layer with ProxProp-all.</p>
+          </div>
         </div>
+
+        <h2 class="title is-4">Update Rules</h2>
+        <div class="content has-text-justified">
+          <p>
+            All update rules share BP's forward and backward pass and differ only in how the gradient \(g\) of a layer
+            becomes a weight change. For a layer whose input batch \(\hat A\) carries a row of ones for the bias, BP+SGD
+            takes \(W \leftarrow W - \eta g\) and ProxProp takes \(W \leftarrow W - \eta g M^{-1}\) with
+            \(M = \hat A \hat A^\top + I\), solved exactly by a Cholesky factorization. Two SGD controls give BP's direction
+            ProxProp's step length.
+          </p>
+          <table class="table is-bordered is-fullwidth is-narrow rules">
+            <thead><tr><th>Method</th><th>Hidden layers</th><th>Output layer</th><th>Role</th></tr></thead>
+            <tbody>
+              <tr><td>BP+SGD</td><td>\(-\eta g\)</td><td>\(-\eta g\)</td><td>baseline</td></tr>
+              <tr><td>ProxProp</td><td>\(-\eta g M^{-1}\)</td><td>\(-\eta g\)</td><td>Frerix et al. (ICLR 2018)</td></tr>
+              <tr><td>ProxProp-all</td><td>\(-\eta g M^{-1}\)</td><td>\(-\eta g M^{-1}\)</td><td>proximal step on every layer</td></tr>
+              <tr><td>NM-static</td><td>\(-\eta c_l g\)</td><td>\(-\eta g\)</td><td>ProxProp's step length at initialization</td></tr>
+              <tr><td>NM-dynamic</td><td>\(-\eta s_l(t) g\)</td><td>\(-\eta g\)</td><td>ProxProp's step length at every step</td></tr>
+              <tr><td>BP+Adam</td><td>Adam</td><td>Adam</td><td>reference</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2 class="title is-4">A One-Step Bound</h2>
+        <div class="content has-text-justified">
+          <p>
+            From a fixed state, changing the learning rate by \(\delta\) moves BP's update by exactly
+            \(|\delta|\,\|g\|_F\) and ProxProp's by at most \(|\delta|\,\|g\|_F/(1+\mu)\), where \(\mu\) is the smallest
+            eigenvalue of the layer's input second-moment matrix. A mode-wise bound, \(|\delta|\,\|G\|_F/2\), does not depend
+            on the input scale. None of 1,260 layer-level checks violates a bound.
+          </p>
+          <img class="figure" src="assets/onestep.png" alt="One-step sensitivity">
+          <div class="notification is-light">
+            <p><strong>Figure 2: One-step sensitivity.</strong> (a) Response of each input mode of the first hidden layer to a
+              learning-rate change at initialization: BP's grows with the mode's energy, while the proximal step damps the strong
+              modes. (b) Measured ratio of ProxProp's response to BP's in every hidden layer, against the median of each bound.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="demo">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3">Interactive Demo</h2>
+    <div class="content has-text-justified">
+      <p>Both parts below use the runs and networks of the report and run entirely in the browser. The guided tour (button at
+        the top of the page) walks through them in about a minute.</p>
+    </div>
+
+    <div id="explorer" class="demo-block">
+      <h3 class="title is-4">Learning-Rate Explorer</h3>
+      <div class="content has-text-justified">
+        <p>Pick a dataset and a network depth, then move the learning rate. Each point is the final validation accuracy of a
+          100-epoch run, averaged over five seeds.</p>
       </div>
       <div class="controls">
-        <div><span class="control-label">Dataset</span><span class="seg" id="ds-seg">
-          <button type="button" data-v="drybean">Dry Bean</button><button type="button" data-v="optdigits">Optdigits</button><button type="button" data-v="har">HAR</button>
-        </span></div>
-        <div><span class="control-label">Network</span><span class="seg" id="arch-seg">
-          <button type="button" data-v="shallow">1 hidden layer</button><button type="button" data-v="medium">2 hidden layers</button><button type="button" data-v="deep">3 hidden layers</button>
-        </span></div>
-      </div>
-      <div class="lr-box">
-        <div class="lr-top">
-          <span class="lr-value">Learning rate <i>&eta;</i> =<b id="lr-value">1</b></span>
-          <button type="button" class="play" id="sweep-btn">&#9654; Sweep &eta;</button>
+        <div class="buttons has-addons" id="ds-seg">
+          <button type="button" class="button is-small" data-v="drybean">Dry Bean</button>
+          <button type="button" class="button is-small" data-v="optdigits">Optdigits</button>
+          <button type="button" class="button is-small" data-v="har">HAR</button>
         </div>
-        <input type="range" id="lr-slider" min="0" max="12" step="1" value="8" aria-label="Learning rate">
-        <div class="ticks" id="lr-ticks"></div>
+        <div class="buttons has-addons" id="arch-seg">
+          <button type="button" class="button is-small" data-v="shallow">1 hidden layer</button>
+          <button type="button" class="button is-small" data-v="medium">2 hidden layers</button>
+          <button type="button" class="button is-small" data-v="deep">3 hidden layers</button>
+        </div>
+        <button type="button" class="button is-small is-rounded" id="sweep-btn">Sweep &eta;</button>
+      </div>
+      <div class="lr-row">
+        <span class="lr-label">Learning rate <i>&eta;</i> = <b id="lr-value">1</b></span>
+        <div class="lr-slider">
+          <input type="range" id="lr-slider" min="0" max="12" step="1" value="8" aria-label="Learning rate">
+          <div class="ticks" id="lr-ticks"></div>
+        </div>
       </div>
       <div class="legend" id="legend"></div>
-      <div class="charts">
-        <figure class="chart"><svg id="curve-chart" role="img" aria-label="Final validation accuracy against learning rate"></svg>
-          <figcaption>Final validation accuracy against the learning rate. Gray band: within 2 points of the best run.</figcaption></figure>
-        <figure class="chart"><svg id="train-chart" role="img" aria-label="Validation accuracy during training"></svg>
-          <figcaption id="train-caption">Validation accuracy during training (mean, and min&ndash;max over 5 seeds).</figcaption></figure>
+      <div class="columns is-variable is-2 charts">
+        <div class="column"><svg id="curve-chart" role="img" aria-label="Final validation accuracy against learning rate"></svg></div>
+        <div class="column"><svg id="train-chart" role="img" aria-label="Validation accuracy during training"></svg></div>
       </div>
-      <div class="cards" id="method-cards"></div>
+      <table class="table is-bordered is-fullwidth is-narrow results-table">
+        <thead><tr><th>Method</th><th>Final val. accuracy</th><th>At this learning rate</th><th>Usable range</th></tr></thead>
+        <tbody id="method-cards"></tbody>
+      </table>
+      <div class="notification is-light">
+        <p><strong>Figure 3: Learning-rate explorer.</strong> Left: final validation accuracy against the learning rate; the
+          gray band marks accuracies within 2 points of the best run, filled markers the usable rates and crosses rates at which
+          a seed failed numerically. Right: validation accuracy during training at the selected rate (mean, and min&ndash;max
+          over the five seeds).</p>
+      </div>
     </div>
 
-    <div class="panel" id="digits">
-      <div class="panel-head">
-        <span class="step">2</span>
-        <div>
-          <h3>Input &rarr; model &rarr; output</h3>
-          <p>Three networks with two hidden layers, trained on Optdigits by BP+SGD, ProxProp and ProxProp-all at the
-            learning rate below (seed 0 of the sweep). Draw a digit, or pick one from the test split.</p>
-        </div>
+    <div id="digits" class="demo-block">
+      <h3 class="title is-4">Input &rarr; Model &rarr; Output</h3>
+      <div class="content has-text-justified">
+        <p>Draw a digit or pick one from the Optdigits test split. Three networks with two hidden layers, trained by BP+SGD,
+          ProxProp and ProxProp-all at the selected learning rate (seed 0 of the sweep), classify it.</p>
       </div>
       <div class="digit-grid">
-        <div class="box">
-          <h4>Input</h4>
+        <div>
           <canvas id="pad" aria-label="Drawing pad"></canvas>
-          <div class="pad-buttons">
-            <button type="button" class="ghost" id="clear-btn">Clear</button>
-            <button type="button" class="ghost" id="random-btn">Random test digit</button>
+          <div class="buttons pad-buttons">
+            <button type="button" class="button is-small" id="clear-btn">Clear</button>
+            <button type="button" class="button is-small" id="random-btn">Random test digit</button>
           </div>
           <div class="examples" id="examples"></div>
         </div>
         <div class="right-col">
-          <div class="box feat-row">
+          <div class="feat-row">
             <div>
-              <h4>Network input</h4>
               <canvas id="feat" width="192" height="192" aria-label="The 64 input features"></canvas>
             </div>
             <div>
-              <div class="input-note">The 32&times;32 bitmap of the digit is cut into 4&times;4 blocks; the 64 block counts
-                (0&ndash;16) are the input, exactly as in Optdigits.</div>
-              <div class="truth" id="truth"></div>
-              <div class="digit-lr">
-                <div class="lr-value">Networks trained with <i>&eta;</i> =<b id="digit-lr-value">3</b></div>
-                <input type="range" id="digit-lr" min="0" max="12" step="1" value="9" aria-label="Learning rate of the networks">
-                <div class="ticks" id="digit-ticks"></div>
-              </div>
+              <p class="input-note">Network input: the 32&times;32 bitmap of the digit is cut into 4&times;4 blocks, and the
+                64 block counts (0&ndash;16) are fed to the network, as in Optdigits.</p>
+              <p class="truth" id="truth"></p>
+              <p class="lr-label">Networks trained with <i>&eta;</i> = <b id="digit-lr-value">3</b></p>
+              <input type="range" id="digit-lr" min="0" max="12" step="1" value="9" aria-label="Learning rate of the networks">
+              <div class="ticks" id="digit-ticks"></div>
             </div>
           </div>
-          <h4 class="out-title">Output</h4>
-          <div class="outs" id="outs"></div>
+          <table class="table is-bordered is-fullwidth is-narrow results-table out-table">
+            <thead><tr><th>Network</th><th>Prediction</th><th>Class probabilities 0&ndash;9</th><th>Training</th></tr></thead>
+            <tbody id="outs"></tbody>
+          </table>
         </div>
       </div>
+      <div class="notification is-light">
+        <p><strong>Figure 4: Input, model and output.</strong> A network that broke down at a large learning rate gives the
+          same answer for every input; at a small learning rate the proximal networks learned too little in 100 epochs.</p>
+      </div>
     </div>
-  </section>
+  </div>
+</section>
 
-  <section class="wrap" id="method">
-    <h2>Method</h2>
-    <p class="lead">All update rules share backpropagation's forward and backward pass. They differ only in how the gradient
-      <i>g</i> of a layer becomes a weight change. For a layer with input batch <i>&Acirc;</i> (with a row of ones for the bias):</p>
-    <div class="eq">
-      <span class="lab">BP+SGD</span><i>W</i> &larr; <i>W</i> &minus; <i>&eta;</i>&thinsp;<i>g</i>
-      <span class="gap"></span>
-      <span class="lab">ProxProp</span><i>W</i> &larr; <i>W</i> &minus; <i>&eta;</i>&thinsp;<i>g</i>&thinsp;(<i>&Acirc;&Acirc;</i><sup>&#8868;</sup> + <i>I</i>)<sup>&minus;1</sup>
+<section class="section" id="results">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3">Results</h2>
+
+    <h3 class="title is-5">Usable learning rates</h3>
+    <div class="content has-text-justified">
+      <img class="figure" src="assets/lr_windows.png" alt="Usable learning rates in nine settings">
+      <div class="notification is-light">
+        <p><strong>Figure 5: Usable learning rates.</strong> Each bar joins the learning rates at which a method trains well
+          (final validation accuracy within 2 points of the best SGD-family run). ProxProp moves the bar to larger learning
+          rates; ProxProp-all widens it and never fails numerically.</p>
+      </div>
     </div>
-    <p class="lead">The proximal step damps the directions in which the layer's input carries much energy. We prove that a
-      change of the learning rate moves it by at most a data-dependent fraction of the gradient step, and check this bound on
-      1,260 layer-level records. ProxProp keeps the explicit step on the output layer; ProxProp-all applies the proximal step
-      there too. Two SGD controls get ProxProp's step length with BP's direction, measured once at initialization (NM-static) or
-      at every step (NM-dynamic).</p>
-  </section>
 
-  <section class="wrap" id="results">
-    <h2>Results</h2>
-    <div class="figure"><img src="assets/lr_windows.png" alt="Usable learning rates of BP+SGD, ProxProp and ProxProp-all in nine settings"></div>
-    <p class="caption"><b>Usable learning rates.</b> Each bar joins the learning rates at which a method trains well (final
-      validation accuracy within 2 points of the best SGD-family run). ProxProp moves the bar to larger learning rates;
-      ProxProp-all widens it and never fails numerically.</p>
+    <h3 class="title is-5">Learning-rate sweeps</h3>
+    <div class="content has-text-justified">
+      <img class="figure" src="assets/sweep.png" alt="Final validation accuracy against learning rate">
+      <div class="notification is-light">
+        <p><strong>Figure 6: Learning-rate sweeps</strong> (mean &plusmn; std over five seeds). The gray band marks the
+          usable region.</p>
+      </div>
+    </div>
 
-    <div class="figure" style="margin-top:34px"><img src="assets/sweep.png" alt="Final validation accuracy against learning rate"></div>
-    <p class="caption"><b>Learning-rate sweeps</b> (mean &plusmn; std over 5 seeds). The gray band marks the usable region.</p>
-
-    <h3 style="margin-top:36px">Test accuracy at the validation-selected learning rate</h3>
-    <div class="table-wrap">
-      <table class="res">
+    <h3 class="title is-5">Test accuracy</h3>
+    <div class="table-container">
+      <table class="table is-bordered is-fullwidth is-narrow test-table">
         <thead>
           <tr><th rowspan="2">Method</th><th colspan="3">Dry Bean</th><th colspan="3">Optdigits</th><th colspan="3">HAR</th></tr>
           <tr><th>1</th><th>2</th><th>3</th><th>1</th><th>2</th><th>3</th><th>1</th><th>2</th><th>3</th></tr>
         </thead>
         <tbody>
-          <tr><td>BP+SGD</td><td>93.1</td><td>93.2</td><td>93.1</td><td>96.2</td><td>96.3</td><td>96.2</td><td>94.3</td><td>94.5</td><td>94.4</td></tr>
-          <tr><td>ProxProp</td><td>93.1</td><td>93.0</td><td>93.3</td><td>95.6</td><td>96.1</td><td>96.7</td><td>95.1</td><td>94.8</td><td>94.2</td></tr>
-          <tr class="hl"><td>ProxProp-all</td><td>93.3</td><td>93.4</td><td>93.3</td><td>96.2</td><td><b>96.9&dagger;</b></td><td>97.0</td><td><b>96.2&dagger;</b></td><td><b>96.1&dagger;</b></td><td><b>95.5&dagger;</b></td></tr>
-          <tr><td>NM-dynamic</td><td>93.0</td><td>92.9</td><td>93.1</td><td>95.9</td><td>96.2</td><td>96.2</td><td>94.6</td><td>94.4</td><td>94.1</td></tr>
-          <tr><td>NM-static</td><td>93.0</td><td>92.9</td><td>93.0</td><td>95.6</td><td>96.0</td><td>96.0</td><td>94.3</td><td>94.0</td><td>93.9</td></tr>
-          <tr><td>BP+Adam</td><td>93.0</td><td>93.0</td><td>93.1</td><td>96.2</td><td>96.5</td><td>96.4</td><td>94.4</td><td>94.5</td><td>94.3</td></tr>
-          <tr><td>Logistic regression</td><td colspan="3">92.0</td><td colspan="3">95.2</td><td colspan="3">95.2</td></tr>
+          <tr><th>BP+SGD</th><td>93.1</td><td>93.2</td><td>93.1</td><td>96.2</td><td>96.3</td><td>96.2</td><td>94.3</td><td>94.5</td><td>94.4</td></tr>
+          <tr><th>ProxProp</th><td>93.1</td><td>93.0</td><td>93.3</td><td>95.6</td><td>96.1</td><td>96.7</td><td>95.1</td><td>94.8</td><td>94.2</td></tr>
+          <tr><th>ProxProp-all</th><td>93.3</td><td>93.4</td><td>93.3</td><td>96.2</td><td><b>96.9</b>&dagger;</td><td>97.0</td><td><b>96.2</b>&dagger;</td><td><b>96.1</b>&dagger;</td><td><b>95.5</b>&dagger;</td></tr>
+          <tr><th>NM-dynamic</th><td>93.0</td><td>92.9</td><td>93.1</td><td>95.9</td><td>96.2</td><td>96.2</td><td>94.6</td><td>94.4</td><td>94.1</td></tr>
+          <tr><th>NM-static</th><td>93.0</td><td>92.9</td><td>93.0</td><td>95.6</td><td>96.0</td><td>96.0</td><td>94.3</td><td>94.0</td><td>93.9</td></tr>
+          <tr><th>BP+Adam</th><td>93.0</td><td>93.0</td><td>93.1</td><td>96.2</td><td>96.5</td><td>96.4</td><td>94.4</td><td>94.5</td><td>94.3</td></tr>
+          <tr><th>Logistic regression</th><td colspan="3">92.0</td><td colspan="3">95.2</td><td colspan="3">95.2</td></tr>
         </tbody>
       </table>
     </div>
-    <p class="caption">Mean of 5 seeds, for 1, 2 and 3 hidden layers. &dagger;: better than BP+SGD after Holm correction
-      (paired <i>t</i>-tests, 27 comparisons, <i>p</i> &lt; 0.05).</p>
+    <div class="notification is-light">
+      <p><strong>Table 1: Test accuracy</strong> (%, mean of five seeds) at each method's validation-selected learning rate,
+        for 1, 2 and 3 hidden layers. &dagger;: better than BP+SGD after Holm correction (paired <i>t</i>-tests, 27 comparisons,
+        <i>p</i> &lt; 0.05).</p>
+    </div>
+  </div>
+</section>
 
-    <div class="figure" style="margin-top:34px"><img src="assets/onestep.png" alt="Per-mode responses and measured damping against the bounds"></div>
-    <p class="caption"><b>Checking the bound.</b> (a) BP's response to a learning-rate change grows with a mode's energy; the
-      proximal step damps the strong modes. (b) Measured damping in every hidden layer against the median of each bound: none
-      of the 1,260 checks violates a bound.</p>
-  </section>
-</main>
-
-<footer>
-  <div class="wrap">ECS 171 Machine Learning &middot; University of California, Davis &middot;
-    <a href="https://github.com/fantasy-creator/Learning-Rate-Sensitivity-of-Backpropagation">Code on GitHub</a></div>
+<footer class="footer">
+  <div class="container">
+    <div class="content has-text-centered">
+      <p>ECS 171 Machine Learning, University of California, Davis.
+        <a href="https://github.com/fantasy-creator/Learning-Rate-Sensitivity-of-Backpropagation">Source code</a>.
+        The page layout follows the <a href="https://github.com/nerfies/nerfies.github.io">Nerfies</a> project-page template.</p>
+    </div>
+  </div>
 </footer>
 </div>
 
-<div class="tour-progress" id="tour-progress"></div>
-<div class="tour-caption" id="tour-caption" aria-live="polite"></div>
-<div class="tour-card" id="tour-card"></div>
+<div id="tour-progress" class="tour-progress"></div>
+<div id="tour-caption" class="tour-caption" aria-live="polite"></div>
+<div id="tour-card" class="tour-card"></div>
 
 <script src="data/sweep.js"></script>
 <script src="data/models.js"></script>

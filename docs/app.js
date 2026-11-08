@@ -188,36 +188,33 @@
     }
   }
 
-  function drawCards() {
-    const s = setting(), i = exIndex(), box = $("#method-cards");
-    box.textContent = "";
+  function methodCell(meth) {
+    const td = document.createElement("td");
+    td.className = "method-cell";
+    td.appendChild(swatch(meth));
+    td.appendChild(document.createTextNode(STYLE[meth].name));
+    return td;
+  }
+
+  function drawCards() { // one table row per update rule
+    const s = setting(), i = exIndex(), body = $("#method-cards");
+    body.textContent = "";
     for (const meth of METHODS) {
-      const r = s.methods[meth], run = r.runs[i];
-      const card = document.createElement("div");
-      card.className = "mcard";
-      const head = document.createElement("div");
-      head.className = "mcard-head";
-      head.appendChild(swatch(meth));
-      const b = document.createElement("b");
-      b.textContent = STYLE[meth].name;
-      head.appendChild(b);
-      card.appendChild(head);
-      const nf = run.fails.length;
-      let chip;
-      if (r.usable[i]) chip = '<span class="chip good">✓ Usable</span>';
-      else if (nf) chip = `<span class="chip bad">✗ Numerical failure in ${nf} of ${SW.seeds} seeds</span>`;
-      else chip = '<span class="chip warn">Outside the usable range</span>';
-      card.insertAdjacentHTML("beforeend",
-        `<div class="mcard-acc">${pct(r.final[i])}<span>%</span></div>` +
-        `<div class="mcard-sub">final validation accuracy, mean of ${SW.seeds} seeds</div>${chip}` +
-        `<div class="mcard-win">Usable range: <b>${windowText(r.usable)}</b></div>`);
-      box.appendChild(card);
+      const r = s.methods[meth], nf = r.runs[i].fails.length;
+      let status;
+      if (r.usable[i]) status = '<span class="status-good">usable</span>';
+      else if (nf) status = `<span class="status-bad">numerical failure in ${nf} of ${SW.seeds} seeds</span>`;
+      else status = '<span class="status-warn">outside the usable range</span>';
+      const tr = document.createElement("tr");
+      tr.appendChild(methodCell(meth));
+      tr.insertAdjacentHTML("beforeend", `<td>${pct(r.final[i])}%</td><td>${status}</td><td>${windowText(r.usable)}</td>`);
+      body.appendChild(tr);
     }
   }
 
   function renderExplorer() {
     for (const [id, key] of [["#ds-seg", "ds"], ["#arch-seg", "arch"]])
-      for (const btn of document.querySelectorAll(id + " button")) btn.classList.toggle("on", btn.dataset.v === ex[key]);
+      for (const btn of document.querySelectorAll(id + " button")) btn.classList.toggle("is-selected", btn.dataset.v === ex[key]);
     $("#lr-slider").value = exIndex();
     $("#lr-value").textContent = lrLabel(LRS[exIndex()]);
     drawCurveChart();
@@ -229,11 +226,11 @@
   function stopSweep() {
     if (sweepTimer) cancelAnimationFrame(sweepTimer);
     sweepTimer = null;
-    $("#sweep-btn").innerHTML = "&#9654; Sweep &eta;";
+    $("#sweep-btn").innerHTML = "Sweep &eta;";
   }
   function startSweep() {
     const t0 = performance.now(), dur = 7000;
-    $("#sweep-btn").innerHTML = "&#9632; Stop";
+    $("#sweep-btn").innerHTML = "Stop";
     const step = (now) => {
       const p = Math.min(1, (now - t0) / dur);
       ex.lrPos = p * (NLR - 1);
@@ -430,12 +427,9 @@
   }
   function modelStatus(model) {
     const acc = (100 * model.val_acc).toFixed(1);
-    if (model.failed) return `<span class="chip bad">✗ Diverged in training (epoch ${model.epoch}): constant predictor</span>`;
-    if (model.val_acc < 0.5) {
-      const w = weakness(model);
-      return `<span class="chip warn">${w[0].toUpperCase() + w.slice(1)}: val. accuracy ${acc}%</span>`;
-    }
-    return `<span class="chip good">✓ Val. accuracy ${acc}%</span>`;
+    if (model.failed) return `<span class="status-bad">diverged at epoch ${model.epoch}; constant predictor</span>`;
+    if (model.val_acc < 0.5) return `<span class="status-warn">${weakness(model)}; val. accuracy ${acc}%</span>`;
+    return `<span class="status-good">val. accuracy ${acc}%</span>`;
   }
   function renderDigits() {
     redrawPad();
@@ -443,35 +437,31 @@
     $("#digit-lr-value").textContent = lrLabel(LRS[dg.lr]);
     const x = currentFeatures();
     drawFeatures(x);
-    $("#truth").innerHTML = dg.example ? `Test digit, true label <b>${dg.example.label}</b>` : "";
+    $("#truth").innerHTML = dg.example ? `Test digit with true label <b>${dg.example.label}</b>.` : "";
     for (const c of document.querySelectorAll("#examples canvas")) c.classList.toggle("on", dg.example === c._ex);
-    const box = $("#outs");
-    box.textContent = "";
+    const body = $("#outs");
+    body.textContent = "";
     const blank = x.every((v) => v === 0);
-    for (const meth of METHODS) {
-      const o = document.createElement("div");
-      o.className = "out";
-      const head = document.createElement("div");
-      head.className = "out-head";
-      head.appendChild(swatch(meth));
-      head.appendChild(document.createTextNode(STYLE[meth].name));
-      o.appendChild(head);
+    for (const meth of METHODS) { // one table row per network: prediction, class probabilities, training outcome
+      const tr = document.createElement("tr");
+      tr.appendChild(methodCell(meth));
       const model = MODELS[meth + "@" + dg.lr];
       if (!model) {
-        o.insertAdjacentHTML("beforeend", '<div class="empty">Network not loaded.</div>');
+        tr.insertAdjacentHTML("beforeend", '<td colspan="3">network not available</td>');
       } else if (blank) {
-        o.insertAdjacentHTML("beforeend", '<div class="empty">Waiting for an input…</div>');
-        o.insertAdjacentHTML("beforeend", `<div class="status">${modelStatus(model)}</div>`);
+        tr.insertAdjacentHTML("beforeend", `<td>&ndash;</td><td class="has-text-grey">waiting for an input</td><td>${modelStatus(model)}</td>`);
       } else {
         const p = predict(model, x), top = p.indexOf(Math.max.apply(null, p));
-        let html = `<div class="pred"><span class="digit">${top}</span><span class="conf">${(100 * p[top]).toFixed(1)}% confident</span></div><div class="bars">`;
+        let hist = '<div class="hist">';
         p.forEach((v, k) => {
-          html += `<div class="bar${k === top ? " top" : ""}"><span>${k}</span><span class="track"><span class="fill" style="width:${(100 * v).toFixed(1)}%;background:${STYLE[meth].color}"></span></span><span>${(100 * v).toFixed(0)}%</span></div>`;
+          hist += `<div class="hcol${k === top ? " top" : ""}"><div class="hbar" style="height:${Math.max(1, 100 * v).toFixed(1)}%` +
+            `${k === top ? ";background:" + STYLE[meth].color : ""}"></div><span>${k}</span></div>`;
         });
-        html += `</div><div class="status">${modelStatus(model)}</div>`;
-        o.insertAdjacentHTML("beforeend", html);
+        hist += "</div>";
+        tr.insertAdjacentHTML("beforeend", `<td><span class="pred">${top}</span><span class="conf">${(100 * p[top]).toFixed(1)}%</span></td>` +
+          `<td>${hist}</td><td>${modelStatus(model)}</td>`);
       }
-      box.appendChild(o);
+      body.appendChild(tr);
     }
   }
 
@@ -482,7 +472,7 @@
     pctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ticksInto($("#digit-ticks"));
     if (!loadModels()) {
-      $("#outs").innerHTML = '<div class="empty">The networks (data/models.js) are not available.</div>';
+      $("#outs").innerHTML = '<tr><td colspan="4">The networks (data/models.js) are not available.</td></tr>';
     }
     const pos = (e) => {
       const r = pad.getBoundingClientRect();
@@ -584,17 +574,16 @@
       if (kind !== cardKind) {
         cardKind = kind;
         if (kind === "intro") {
-          card.innerHTML = '<div class="kicker">ECS 171 &middot; Final project &middot; Live demo</div>' +
-            "<h2>Learning-Rate Sensitivity of Backpropagation</h2>" +
-            "<p>Does Proximal Backpropagation widen the range of learning rates that train well, or only move it?</p>" +
-            '<p style="margin-top:18px;font-size:18px">Zekai Yu &middot; Tingshuo Fan &middot; Jiacheng Chen &nbsp;&middot;&nbsp; UC Davis</p>';
+          card.innerHTML = '<div class="venue">ECS 171 Machine Learning, Final Project</div>' +
+            '<div class="card-title">Learning-Rate Sensitivity of Backpropagation</div>' +
+            '<div class="card-sub">Does Proximal Backpropagation widen the range of learning rates that train well, or only move it?</div>' +
+            '<div class="card-authors">Zekai Yu, Tingshuo Fan, Jiacheng Chen</div>' +
+            '<div class="card-sub">University of California, Davis</div>';
         } else if (kind === "outro") {
-          card.innerHTML = '<div class="kicker">Takeaway</div><h2>Shift ≠ widening</h2>' +
-            '<div class="stats">' +
-            '<div class="stat"><div class="num prox">0.5–2 decades</div><p>ProxProp moves the usable learning-rate range up</p></div>' +
-            '<div class="stat"><div class="num prox">3 of 9</div><p>settings in which ProxProp’s range is wider than BP’s</p></div>' +
-            '<div class="stat"><div class="num">8 of 9 &middot; 0 failures</div><p>ProxProp-all: wider range than BP, no numerical failure in 585 runs</p></div>' +
-            '<div class="stat"><div class="num">+1.1 to +1.9 pp</div><p>ProxProp-all’s test-accuracy gain over BP+SGD on HAR</p></div></div>' +
+          card.innerHTML = '<div class="card-title">Shift, not widening</div><ul>' +
+            "<li>ProxProp moves the usable learning-rate range up by half a decade to two decades, but widens it in only 3 of 9 settings.</li>" +
+            "<li>Applying the proximal step to the output layer too (ProxProp-all) widens the range in 8 of 9 settings, with no numerical failure in 585 runs.</li>" +
+            "<li>ProxProp-all raises test accuracy on HAR by 1.1 to 1.9 points over BP+SGD.</li></ul>" +
             '<div class="url">fantasy-creator.github.io/Learning-Rate-Sensitivity-of-Backpropagation</div>';
         }
       }
@@ -623,7 +612,7 @@
       dg.lr = t < 41.5 ? 9 : t < 46.5 ? 4 : 10;
       // scrolling
       // keep the controls and results below the caption bar at the top of the screen
-      const yE = yOf($("#explorer .controls")) - 82, yD = yOf($("#digits .digit-grid")) - 108;
+      const yE = yOf($("#explorer .controls")) - 72, yD = yOf($("#digits .digit-grid")) - 108;
       let y;
       if (t < 5) y = 0;
       else if (t < 7.5) y = yE * ease(seg(t, 5, 7.5));
@@ -675,6 +664,14 @@
   $("#tour-caption").addEventListener("click", () => Tour.playing() && Tour.stop());
   if (RECORD) {
     document.body.classList.add("recording");
+    const v = $("#teaser-video"); // a still image instead of the (previously recorded) tour video
+    if (v) {
+      const img = document.createElement("img");
+      img.src = v.getAttribute("poster");
+      img.alt = "Study overview";
+      img.className = "teaser-still";
+      v.replaceWith(img);
+    }
     window.__tour = { render: Tour.render, duration: Tour.DUR };
     if (RECORD_AT && RECORD_AT[1]) window.addEventListener("load", () => Tour.render(+RECORD_AT[1]));
   }
