@@ -150,7 +150,8 @@ interactive panels. Everything runs in the browser, so the page also works offli
 - **Input → model → output.** Draw a digit or pick one from the Optdigits test split. Three networks with two hidden
   layers, trained by the three update rules at the chosen learning rate, classify it in the browser. A network that
   broke down at a large learning rate gives the same answer for every input.
-- **Guided tour.** A one-minute narrated walk through both panels for presentations.
+- **Guided tour.** A one-minute narrated walk through both panels for presentations, also recorded as a
+  [1080p video](docs/assets/tour.mp4).
 
 To rebuild the demo data and video:
 
